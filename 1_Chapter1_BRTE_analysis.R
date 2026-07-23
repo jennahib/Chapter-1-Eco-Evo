@@ -231,35 +231,22 @@ biomass <- read_csv(
 )
 
 #biomass Bayes
-bbio1 <- brm(dry.mass ~ Treatment*Rhizo.Int*PopID + SeedID + (1|ConeID), 
+brtebio <- brm(dry.mass ~ Treatment*Rhizo.Int*PopID + SeedID, 
             data= biomass, family= Gamma(link="log"))
-summary(bbio1)
-mcmc_plot(bbio1)
+summary(brtebio)
+mcmc_plot(brtebio)
 
 #save model for soil chemistry
 dir.create("outputs", showWarnings = FALSE)
 dir.create("outputs/models", recursive = TRUE, showWarnings = FALSE)
 saveRDS(
-  bbio1,
-  "outputs/models/bbio1.rds"
-)
-
-#use for ESA 2026 poster:
-plot_comparisons(
-  bbio1,
-  variables = "Rhizo.Int",
-  condition = c("Treatment", "PopID")
-)
-
-plot_comparisons(
-  bbio1,
-  variables = "Treatment",
-  condition = c("Rhizo.Int", "PopID")
+  brtebio,
+  "outputs/models/brtebio.rds"
 )
 
 #### Microbial effect figure for poster
 microbe.fig <- plot_comparisons(
-  bbio1,
+  brtebio,
   variables = list(Treatment = c("Dead", "Live")),
   condition = c("Rhizo.Int", "PopID")
 ) +
@@ -274,8 +261,14 @@ microbe.fig <- plot_comparisons(
       "RHIZO" = "Rhizosphere"
     )
   ) +
-  scale_color_discrete(
-    name = "Sagebrush population",
+  scale_color_manual(
+    values = c(
+      "BB" = "#8C6D46",
+      "HG" = "#D98C3F",
+      "NG" = "#D8C8A8",
+      "OH" = "#6E9A63",
+      "SR" = "#A66A3A"
+    ),
     labels = c(
       "BB" = "Bogus Basin",
       "HG" = "Hulls Gulch",
@@ -286,7 +279,7 @@ microbe.fig <- plot_comparisons(
   ) +
   labs(
     x = "Soil inoculum source",
-    y = "Effect of microbes on\ncheatgrass biomass"
+    y = "Effect of live microbes on\ncheatgrass biomass"
   ) +
   theme_classic(base_size = 18) +
   theme(
@@ -308,16 +301,7 @@ microbe.fig <- plot_comparisons(
     axis.title.y = element_text(
       margin = margin(r = 8)
     ),
-    legend.title = element_text(
-      size = 15,
-      face = "bold",
-      color = "#2F3A1F"
-    ),
-    legend.text = element_text(
-      size = 14,
-      color = "#2F2A20"
-    ),
-    legend.position = "right",
+    legend.position = "none",
     panel.border = element_rect(
       color = "#C7B99D",
       fill = NA,
@@ -338,6 +322,7 @@ microbe.fig <- plot_comparisons(
       l = 40
     )
   )
+
 microbe.fig
 ggsave(
   filename = "microbe_effect_biomass_poster.png",
@@ -350,9 +335,9 @@ ggsave(
 )
 
 #####plot predictions figure####
-plot_predictions(bbio1, condition=c("Treatment", "Rhizo.Int", "PopID"))
+plot_predictions(brtebio, condition=c("Treatment", "Rhizo.Int", "PopID"))
 biomass.fig <- plot_predictions(
-  bbio1,
+  brtebio,
   condition = c("Treatment", "Rhizo.Int", "PopID")
 ) +
   labs(
@@ -404,13 +389,13 @@ ggsave(
 )
 
 
-plot_comparisons(bbio1, variable=c("Treatment"), condition=c("Rhizo.Int", "PopID"))
-plot_comparisons(bbio1, variable=c("Rhizo.Int"), condition=c("PopID"))
-avg_predictions(bbio1, variable=c("Treatment", "Rhizo.Int", "PopID"))
+plot_comparisons(brtebio, variable=c("Treatment"), condition=c("Rhizo.Int", "PopID"))
+plot_comparisons(brtebio, variable=c("Rhizo.Int"), condition=c("PopID"))
+avg_predictions(brtebio, variable=c("Treatment", "Rhizo.Int", "PopID"))
 
 #tx effect:
   plot_predictions(
-    bbio1,
+    brtebio,
     condition = c("Treatment", "Rhizo.Int")
   )
 
